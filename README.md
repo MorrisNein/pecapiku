@@ -33,7 +33,7 @@ decorated function.
 ## Cache File Management
 
 As plain as a day:
-```
+``` python
 from pecapiku import config
 config.get_cache_dir()  # Look at the default cache dir
 # The result is OS-specific
@@ -82,7 +82,7 @@ Or it may use `args` and `kwargs` - as the only option for any precompiled non-P
  ## Examples
 
  Example 1. CacheDict as a context manager.
-```
+``` python
 import numpy as np
 from pecapiku import CacheDict
 with CacheDict('example_cache_dict.pkl') as cache_dict:
@@ -97,7 +97,7 @@ with CacheDict('example_cache_dict.pkl') as cache_dict:
     [2, 4]])}
 ```
 Example 2. CacheDict as a decorator.
-```
+``` python
 import numpy as np
 from pecapiku import CacheDict
 a = np.array([[1, 2], [3, 4]])
@@ -112,7 +112,7 @@ array([[ 5, 12],
     [21, 32]])
 ```
 Example 3. SingleValueCache as a decorator.
-```
+``` python
 import time
 from timeit import timeit
 from pecapiku import SingleValueCache
