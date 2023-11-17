@@ -35,6 +35,7 @@ decorated function.
 As plain as a day:
 ``` python
 from pecapiku import config
+
 config.get_cache_dir()  # Look at the default cache dir
 # The result is OS-specific
 config.set_cache_dir(...)  # Change it to a more preferable directory
@@ -85,6 +86,7 @@ Or it may use `args` and `kwargs` - as the only option for any precompiled non-P
 ``` python
 import numpy as np
 from pecapiku import CacheDict
+
 with CacheDict('example_cache_dict.pkl') as cache_dict:
     x = np.array([[1, 2], [3, 4]])
     x_T = cache_dict['x_T']  # Read the cache first
@@ -93,29 +95,32 @@ with CacheDict('example_cache_dict.pkl') as cache_dict:
     cache_dict['x_T'] = x_T  # Put the value in cache
     print(cache_dict)
 
-{'x_T': array([[1, 3],
-    [2, 4]])}
+# {'x_T': array([[1, 3],
+#                [2, 4]])}
 ```
 Example 2. CacheDict as a decorator.
 ``` python
 import numpy as np
 from pecapiku import CacheDict
+
 a = np.array([[1, 2], [3, 4]])
 b = np.array([[5, 6], [7, 8]])
+
 cached_mult = CacheDict.decorate(
      np.multiply,  # Select a function to cache.
      file_path='np_multiplication.pkl',  # Select path to a pickle file.
      inner_key='tuple(map(lambda a: a.data.tobytes(), args))')  # Retrieve hashable representation of args.
 
 cached_mult(a, b)
-array([[ 5, 12],
-    [21, 32]])
+# array([[ 5, 12],
+#        [21, 32]])
 ```
 Example 3. SingleValueCache as a decorator.
 ``` python
 import time
 from timeit import timeit
 from pecapiku import SingleValueCache
+
 def a_heavy_function():
     time.sleep(1)
     return 42
