@@ -1,6 +1,6 @@
 # Pecapiku - a persistent cache pickling utility
 
-It provides syntax for 
+See the syntax examples into the docstrings.
 
 Installation:
 
