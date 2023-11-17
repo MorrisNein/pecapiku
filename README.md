@@ -60,8 +60,8 @@ The `CacheDict` context manager follows these steps:
 The `.decorate()` cache decorators follow these steps:
 
 1. If read access is given, try to read the cache from a file (and per key for `CacheDict`).
-2. If execution access is given and cache not found at previous step, evaluate the function.
-3. If write access is given, update the cache.
+2. If execution access is given and cache not found at the previous step, evaluate the function.
+3. If write access is given and the function was evaluated at the previous step, update the cache file.
 
 ## Hashable Key Management
 
