@@ -2,6 +2,12 @@
 
 Provides a syntax for storing and retrieving the results of a computation on disk using `pickle` library.
 
+> ***Important note!*** The purpose of the utility is not to speed up calculations or to save memory. As the size
+of a cache file increases, the access time will raise.
+> 
+> The main purpose is to restart a heavy computational script if something broke in the middle and there is no way to debug it
+beforehand.
+
 The two main classes are `CacheDict`, `SingleValueCache`.
 
 ## `CacheDict`
@@ -23,12 +29,6 @@ cache file is updated once every evaluation of the function.
 
 The `SingleValueCache.decorate()` acts similar to `CacheDict.decorate()`, but it stores a single value in a file per
 decorated function.
-
-***Important notice!*** The primary purpose of the utility is not to speed up calculations or save memory. As the size
-of a cache file increases, the time to access it will raise.
-
-The main purpose is to allow to restart a script when something broke in the middle and there is no way to debug it
-beforehand.
 
 ## Cache File Management
 
