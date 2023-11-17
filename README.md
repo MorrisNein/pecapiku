@@ -2,7 +2,7 @@
 
 Provides a syntax for storing and retrieving the results of a computation on disk using `pickle` library.
 
-The two main objects are `CacheDict`, `SingleValueCache`.
+The two main classes are `CacheDict`, `SingleValueCache`.
 
 ## `CacheDict`
 
