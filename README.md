@@ -33,12 +33,12 @@ decorated function.
 ## Cache File Management
 
 As plain as a day:
-
-    >>> from pecapiku import config
-    >>> config.get_cache_dir()  # Look at the default cache dir
-    # The result is OS-specific
-    >>> config.set_cache_dir(...)  # Change it to a more preferable directory
-
+```
+from pecapiku import config
+config.get_cache_dir()  # Look at the default cache dir
+# The result is OS-specific
+config.set_cache_dir(...)  # Change it to a more preferable directory
+```
 All cache files will be created inside this directory, if a filename or a relative cache path is provided.
 If an absolute path is provided, a pickle file will appear at the path.
 
@@ -82,48 +82,48 @@ Or it may use `args` and `kwargs` - as the only option for any precompiled non-P
  ## Examples
 
  Example 1. CacheDict as a context manager.
+```
+import numpy as np
+from pecapiku import CacheDict
+with CacheDict('example_cache_dict.pkl') as cache_dict:
+    x = np.array([[1, 2], [3, 4]])
+    x_T = cache_dict['x_T']  # Read the cache first
+    if isinstance(x_T, NoCache):  # If cache not found,
+     x_T = x.T    #   then execute the value
+    cache_dict['x_T'] = x_T  # Put the value in cache
+    print(cache_dict)
 
-    >>> import numpy as np
-    >>> from pecapiku import CacheDict
-    >>> with CacheDict('example_cache_dict.pkl') as cache_dict:
-    ...     x = np.array([[1, 2], [3, 4]])
-    ...     x_T = cache_dict['x_T']  # Read the cache first
-    ...     if isinstance(x_T, NoCache):  # If cache not found,
-    ...         x_T = x.T    #   then execute the value
-    ...     cache_dict['x_T'] = x_T  # Put the value in cache
-    ...     print(cache_dict)
-    ...
-    {'x_T': array([[1, 3],
-       [2, 4]])}
+{'x_T': array([[1, 3],
+    [2, 4]])}
+```
+Example 2. CacheDict as a decorator.
+```
+import numpy as np
+from pecapiku import CacheDict
+a = np.array([[1, 2], [3, 4]])
+b = np.array([[5, 6], [7, 8]])
+cached_mult = CacheDict.decorate(
+     np.multiply,  # Select a function to cache.
+     file_path='np_multiplication.pkl',  # Select path to a pickle file.
+     inner_key='tuple(map(lambda a: a.data.tobytes(), args))')  # Retrieve hashable representation of args.
 
- Example 2. CacheDict as a decorator.
-
-    >>> import numpy as np
-    >>> from pecapiku import CacheDict
-    >>> a = np.array([[1, 2], [3, 4]])
-    >>> b = np.array([[5, 6], [7, 8]])
-    >>> cached_mult = CacheDict.decorate(
-    ...     np.multiply,  # Select a function to cache.
-    ...     file_path='np_multiplication.pkl',  # Select path to a pickle file.
-    ...     inner_key='tuple(map(lambda a: a.data.tobytes(), args))')  # Retrieve hashable representation of args.
-    ...
-    >>> cached_mult(a, b)
-    array([[ 5, 12],
-       [21, 32]])
-
+cached_mult(a, b)
+array([[ 5, 12],
+    [21, 32]])
+```
 Example 3. SingleValueCache as a decorator.
+```
+import time
+from timeit import timeit
+from pecapiku import SingleValueCache
+def a_heavy_function():
+    time.sleep(1)
+    return 42
 
-     >>> import time
-     >>> from timeit import timeit
-     >>> from pecapiku import SingleValueCache
-     >>> def a_heavy_function():
-     ...     time.sleep(1)
-     ...     return 42
-     ...
-     >>> cached_func = SingleValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
-     >>> print(timeit(a_heavy_function, number=10))  # 10.070
-     >>> print(timeit(cached_func, number=10))  # 1.015
-
+cached_func = SingleValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
+print(timeit(a_heavy_function, number=10))  # 10.070
+print(timeit(cached_func, number=10))  # 1.015
+```
 ## Installation
 
 `pip install git+https://github.com/MorrisNein/pecapiku`
