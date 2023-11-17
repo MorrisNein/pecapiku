@@ -13,7 +13,7 @@ from typing import Any, Callable, Hashable, Literal
 from pecapiku.config import config
 from pecapiku.hash import get_hash
 
-__all__ = ['CacheDict', 'OneValueCache', 'NoCache']
+__all__ = ['CacheDict', 'SingleValueCache', 'NoCache']
 
 CacheAccess = Literal['r', 're', 'ew', 'rew', 'e']
 
@@ -289,11 +289,11 @@ class CacheDict(AbstractContextManager):
         return cache_dict[key]
 
 
-class OneValueCache:
+class SingleValueCache:
     """ Decorator for caching of evaluation results.
     Creates a "pickle" file at disk space on a specified path.
     Wraps a function and stores its execution result in the file.
-    To apply, use the method ``OneValueCache.decorate()``.
+    To apply, use the method ``SingleValueCache.decorate()``.
 
     Example
     --------
@@ -302,7 +302,7 @@ class OneValueCache:
     >>> def a_heavy_function():
     ...     time.sleep(1)
     ...
-    >>> cached_func = OneValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
+    >>> cached_func = SingleValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
     >>> timeit(cached_func)  #
     >>> timeit(a_heavy_function)  #
 
@@ -322,7 +322,7 @@ class OneValueCache:
         ...     time.sleep(1)
         ...     return 42
         ...
-        >>> cached_func = OneValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
+        >>> cached_func = SingleValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
         >>> print(timeit(a_heavy_function, number=10))  # 10.070
         >>> print(timeit(cached_func, number=10))  # 1.015
 
