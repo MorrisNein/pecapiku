@@ -76,8 +76,8 @@ There are 3 ways of getting a key:
 2. `inner_key` may be provided in a form of string code expression or a callable.
 This expression or callable must return a hashable result that may be used as a dictionary key.
 It may use inner function arguments by their corresponding names.
-Or it may use `args` and `kwargs` - as the only option for any non-Python precompiled function.
-3. `outer_key` is a hashable constant to access a value in a `CachedDict`.
+Or it may use `args` and `kwargs` - as the only option for any precompiled non-Python function.
+3. `outer_key` is a hashable constant to access a value in a `CacheDict`.
 
  ## Examples
 
