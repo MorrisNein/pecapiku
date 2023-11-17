@@ -1,4 +1,4 @@
-# Pecapiku - Persistent cache pickling utility
+# Pecapiku - a persistent cache pickling utility
 
 It provides syntax for 
 
