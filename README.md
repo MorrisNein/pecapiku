@@ -125,9 +125,14 @@ def a_heavy_function():
     time.sleep(1)
     return 42
 
+@SingleValueCache('a_heavy_function.pkl')  # or @SingleValueCache.decorate(file_path='a_heavy_function.pkl')
+def a_heavy_function_cached():
+    time.sleep(1)
+    return 42
+
 cached_func = SingleValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
 print(timeit(a_heavy_function, number=10))  # 10.070
-print(timeit(cached_func, number=10))  # 1.015
+print(timeit(a_heavy_function_cached, number=10))  # 1.015
 ```
 ## Installation
 
