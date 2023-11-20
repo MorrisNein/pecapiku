@@ -1,2 +1,4 @@
+from .cache_dict import CacheDict
 from .config import config
-from .persistent_cache import CacheDict, NoCache, SingleValueCache
+from .no_cache import NoCache
+from .single_value_cache import SingleValueCache
