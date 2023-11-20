@@ -130,7 +130,6 @@ def a_heavy_function_cached():
     time.sleep(1)
     return 42
 
-cached_func = SingleValueCache.decorate(a_heavy_function, 'a_heavy_function.pkl')
 print(timeit(a_heavy_function, number=10))  # 10.070
 print(timeit(a_heavy_function_cached, number=10))  # 1.015
 ```
