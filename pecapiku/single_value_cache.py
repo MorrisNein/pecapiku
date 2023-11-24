@@ -39,15 +39,17 @@ class SingleValueCache(BaseCache):
     >>> print(timeit(a_heavy_function_cached, number=10))  # 1.015
     """
 
+    @classmethod
+    def _get_default_file_path(cls) -> None:
+        return None
+
     def __init__(self, file_path: os.PathLike | str | None = None, access: CacheAccess = 'rew'):
         super().__init__(file_path, access)
         self.cache_dict = None
 
     def __call__(self,
-                 func: DecoratedCallable | None = None,
-                 file_path: os.PathLike | str | None = None,
-                 access: CacheAccess = 'rew') -> DecoratedCallable:
-        return self.decorate(func, file_path, access)
+                 func: DecoratedCallable | None = None) -> DecoratedCallable:
+        return self.decorate(func)
 
     def get_cache_val(self, key: Hashable) -> Any:
         return _initialize_cache(self.file_path)

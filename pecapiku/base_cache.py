@@ -85,14 +85,19 @@ class BaseCache(ABC):
     def _decorate(cls, func: DecoratedCallable, *args, **kwargs) -> DecoratedCallable:
         raise NotImplementedError()
 
+    @classmethod
+    @abstractmethod
+    def _get_default_file_path(cls):
+        raise NotImplementedError()
+
     @omnimethod
     def decorate(self: BaseCache | Type[BaseCache],
                  func: DecoratedCallable,
                  file_path: os.PathLike | str | None = None,
                  access: CacheAccess | None = None, *args, **kwargs) -> DecoratedCallable:
         if not isinstance(self, BaseCache):
-            file_path = file_path
-            access = access
+            file_path = file_path or self._get_default_file_path()
+            access = access or 'rew'
         else:
             file_path = file_path or self.file_path
             access = access or self.access

@@ -8,7 +8,7 @@ from inspect import getcallargs, ismethod, signature
 from typing import Any, Callable, Hashable
 
 from pecapiku.base_cache import BaseCache, DecoratedCallable, omnimethod
-from pecapiku.cache_access import CacheAccess, _initialize_cache, update_cache
+from pecapiku.cache_access import COMP_CACHE_FILE_NAME, CacheAccess, _initialize_cache, update_cache
 from pecapiku.hash import get_hash
 from pecapiku.no_cache import NoCache
 
@@ -105,6 +105,10 @@ class CacheDict(BaseCache):
        [21, 32]])
 
     """
+
+    @classmethod
+    def _get_default_file_path(cls):
+        return COMP_CACHE_FILE_NAME
 
     def __init__(self, file_path: os.PathLike | str | None = None, access: CacheAccess = 'rew'):
         super().__init__(file_path, access)
