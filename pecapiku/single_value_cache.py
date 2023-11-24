@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from functools import partial, wraps
-from typing import Any, Callable, Hashable, Type, TypeVar
+from typing import Any, Hashable
 
 from pecapiku.base_cache import BaseCache, DecoratedCallable, omnimethod
 from pecapiku.cache_access import CacheAccess, _initialize_cache, _resolve_filepath, update_cache
@@ -44,7 +44,7 @@ class SingleValueCache(BaseCache):
         self.cache_dict = None
 
     def __call__(self,
-                 func: DecoratedCallable,
+                 func: DecoratedCallable | None = None,
                  file_path: os.PathLike | str | None = None,
                  access: CacheAccess = 'rew') -> DecoratedCallable:
         return self.decorate(func, file_path, access)
@@ -59,7 +59,7 @@ class SingleValueCache(BaseCache):
         return 0
 
     @classmethod
-    def _decorate(cls, func: DecoratedCallable,
+    def _decorate(cls, func: DecoratedCallable | None = None,
                   file_path: os.PathLike | str | None = None,
                   access: CacheAccess = 'rew') -> DecoratedCallable:
         """ Wraps a function and stores its execution results into a pickle cache file.
@@ -109,8 +109,8 @@ class SingleValueCache(BaseCache):
         return _initialize_cache(file_path)
 
     @omnimethod
-    def decorate(self, func: DecoratedCallable, file_path: os.PathLike | str | None = None,
-                 access: CacheAccess = 'rew', **kwargs) -> DecoratedCallable:
+    def decorate(self, func: DecoratedCallable | None = None, file_path: os.PathLike | str | None = None,
+                 access: CacheAccess | None = None, **kwargs) -> DecoratedCallable:
         """ Wraps a function and stores its execution results into a pickle cache file.
 
         Example

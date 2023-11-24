@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 from collections import defaultdict
-from contextlib import AbstractContextManager
 from functools import partial, wraps
 from inspect import getcallargs, ismethod, signature
 from typing import Any, Callable, Hashable
@@ -112,7 +111,7 @@ class CacheDict(BaseCache):
         self.cache_dict = None
 
     def __call__(self,
-                 func: DecoratedCallable,
+                 func: DecoratedCallable | None = None,
                  outer_key: Hashable | None = None,
                  inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable:
         return self.decorate(func=func, outer_key=outer_key, inner_key=inner_key)
@@ -139,7 +138,7 @@ class CacheDict(BaseCache):
 
     @classmethod
     def _decorate(cls,
-                  func: DecoratedCallable,
+                  func: DecoratedCallable | None = None,
                   file_path: os.PathLike | str | None = None,
                   access: CacheAccess = 'rew',
                   outer_key: Hashable | None = None,
@@ -166,9 +165,9 @@ class CacheDict(BaseCache):
         return decorator_return
 
     @omnimethod
-    def decorate(self, func: DecoratedCallable,
+    def decorate(self, func: DecoratedCallable | None = None,
                  file_path: os.PathLike | str | None = None,
-                 access: CacheAccess = 'rew',
+                 access: CacheAccess | None = None,
                  outer_key: Hashable | None = None,
                  inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable:
         """ Wraps a function and stores its execution results into a pickled cache dictionary.
