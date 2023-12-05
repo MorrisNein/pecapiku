@@ -1,8 +1,7 @@
 [<img src="https://codecov.io/gh/MorrisNein/pecapiku/branch/main/graph/badge.svg">](https://app.codecov.io/gh/MorrisNein/pecapiku)
-[<img src="https://github.com/MorrisNein/pecapiku/workflows/Build/badge.svg?branch=main">](https://github.com/MorrisNein/pecapiku/actions)
+[![Build](https://github.com/MorrisNein/pecapiku/actions/workflows/unit-build.yml/badge.svg)](https://github.com/MorrisNein/pecapiku/actions/workflows/unit-build.yml)
 [<img src="https://img.shields.io/github/license/MorrisNein/pecapiku">](https://github.com/MorrisNein/pecapiku/blob/main/LICENSE)
 [<img src="https://img.shields.io/badge/Telegram-Author-blue.svg">](https://t.me/morrisnein)
-
 # Pecapiku
 
 ... a persistent cache pickling utility
