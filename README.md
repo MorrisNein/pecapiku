@@ -1,12 +1,20 @@
-# Pecapiku - a persistent cache pickling utility
+[<img src="https://codecov.io/gh/MorrisNein/picapiku/branch/main/graph/badge.svg">](https://app.codecov.io/gh/MorrisNein/pecapiku)
+[<img src="https://github.com/MorrisNein/picapiku/workflows/Build/badge.svg?branch=main">](https://github.com/MorrisNein/pecapiku/actions)
+[<img src="https://img.shields.io/github/license/MorrisNein/pecapiku">](https://github.com/MorrisNein/pecapiku/blob/main/LICENSE)
+[<img src="https://img.shields.io/badge/Telegram-Author-blue.svg">](https://t.me/morrisnein)
+
+# Pecapiku
+
+... a persistent cache pickling utility
 
 Provides a syntax for storing and retrieving the results of a computation on disk using `pickle` library.
 
 > ***Important note!*** The purpose of the utility is not to speed up calculations or to save memory. As the size
-of a cache file increases, the access time will raise.
-> 
-> The main purpose is to restart a heavy computational script if something broke in the middle and there is no way to debug it
-beforehand.
+> of a cache file increases, the access time will raise.
+>
+> The main purpose is to restart a heavy computational script if something broke in the middle and there is no way to
+> debug it
+> beforehand.
 
 The two main classes are `CacheDict`, `SingleValueCache`.
 
@@ -33,6 +41,7 @@ decorated function.
 ## Cache File Management
 
 As plain as a day:
+
 ``` python
 from pecapiku import config
 
@@ -40,6 +49,7 @@ config.get_cache_dir()  # Look at the default cache dir
 # The result is OS-specific
 config.set_cache_dir(...)  # Change it to a more preferable directory
 ```
+
 All cache files will be created inside this directory, if a filename or a relative cache path is provided.
 If an absolute path is provided, a pickle file will appear at the path.
 
@@ -75,14 +85,15 @@ There are 3 ways of getting a key:
     - positional and keyword arguments
     - object fields, if this function is a method
 2. `inner_key` may be provided in a form of string code expression or a callable.
-This expression or callable must return a hashable result that may be used as a dictionary key.
-It may use inner function arguments by their corresponding names.
-Or it may use `args` and `kwargs` - as the only option for any precompiled non-Python function.
+   This expression or callable must return a hashable result that may be used as a dictionary key.
+   It may use inner function arguments by their corresponding names.
+   Or it may use `args` and `kwargs` - as the only option for any precompiled non-Python function.
 3. `outer_key` is a hashable constant to access a value in a `CacheDict`.
 
- ## Examples
+## Examples
 
- Example 1. CacheDict as a context manager.
+Example 1. CacheDict as a context manager.
+
 ``` python
 import numpy as np
 from pecapiku import CacheDict
@@ -98,7 +109,9 @@ with CacheDict('example_cache_dict.pkl') as cache_dict:
 # {'x_T': array([[1, 3],
 #                [2, 4]])}
 ```
+
 Example 2. CacheDict as a decorator.
+
 ``` python
 import numpy as np
 from pecapiku import CacheDict
@@ -115,7 +128,9 @@ cached_mult(a, b)
 # array([[ 5, 12],
 #        [21, 32]])
 ```
+
 Example 3. SingleValueCache as a decorator.
+
 ``` python
 import time
 from timeit import timeit
@@ -133,6 +148,7 @@ def a_heavy_function_cached():
 print(timeit(a_heavy_function, number=10))  # 10.070
 print(timeit(a_heavy_function_cached, number=10))  # 1.015
 ```
+
 ## Installation
 
 `pip install git+https://github.com/MorrisNein/pecapiku`

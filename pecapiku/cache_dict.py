@@ -5,10 +5,10 @@ import os
 from collections import defaultdict
 from functools import partial, wraps
 from inspect import getcallargs, ismethod, signature
-from typing import Any, Callable, Hashable
+from typing import Any, Callable, Generic, Hashable
 
-from pecapiku.base_cache import BaseCache, DecoratedCallable, omnimethod
-from pecapiku.cache_access import COMP_CACHE_FILE_NAME, CacheAccess, _initialize_cache, update_cache
+from pecapiku.base_cache import BaseCache, DecoratedCallable, Decorator, omnimethod
+from pecapiku.cache_access import COMP_CACHE_FILE_NAME, CacheAccess, _initialize_cache, _resolve_filepath, update_cache
 from pecapiku.hash import get_hash
 from pecapiku.no_cache import NoCache
 
@@ -58,7 +58,7 @@ def parse_key(callable_or_code: Callable[[Any], Hashable] | str, func: Callable,
     return key
 
 
-class CacheDict(BaseCache):
+class CacheDict(BaseCache, Generic[DecoratedCallable]):
     """ Decorator/context manager for caching of evaluation results.
     Creates a "pickle" file at disk space on a specified path.
 
@@ -117,22 +117,23 @@ class CacheDict(BaseCache):
     def __call__(self,
                  func: DecoratedCallable | None = None,
                  outer_key: Hashable | None = None,
-                 inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable:
+                 inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable | Decorator:
         return self.decorate(func=func, outer_key=outer_key, inner_key=inner_key)
 
-    def get_cache_val(self, key: Hashable) -> Any:
+    def _get_cache_val(self, key: Hashable) -> Any:
+        initialize_cache_dict(self.file_path)
         return self.cache_dict[key]
 
-    def put_cache_val(self, key: Hashable, value: Any) -> None:
+    def _put_cache_val(self, key: Hashable, value: Any) -> None:
         self.cache_dict[key] = value
 
-    def key_func(self, func, func_agrs, func_kwargs, inner_key, outer_key) -> Hashable:
+    def _key_func(self, func, func_agrs, func_kwargs, inner_key, outer_key) -> Hashable:
         if outer_key is not None:
             key = outer_key
         elif inner_key is not None:
             key = parse_key(inner_key, func, *func_agrs, **func_kwargs)
         else:
-            hash_objects = [func.__name__, func_agrs, tuple(sorted(func_kwargs.items()))]
+            hash_objects = [func.__name__, func_agrs, func_kwargs]
 
             if ismethod(func):
                 hash_objects.insert(0, func.__self__)
@@ -146,9 +147,11 @@ class CacheDict(BaseCache):
                   file_path: os.PathLike | str | None = None,
                   access: CacheAccess = 'rew',
                   outer_key: Hashable | None = None,
-                  inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable:
+                  inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable | Decorator:
         if outer_key is not None and inner_key is not None:
             raise ValueError('At most one of (outer key, inner key) can be specified.')
+
+        file_path = _resolve_filepath(file_path)
 
         @wraps(func)
         def decorated(*args, **kwargs):
@@ -157,8 +160,6 @@ class CacheDict(BaseCache):
                 val = instance._read_execute_write(func, func_args=args, func_kwargs=kwargs, access=access,
                                                    key_kwargs=dict(outer_key=outer_key, inner_key=inner_key))
             return val
-
-        decorator_return = decorated
         if func is None:
             decorator_return = partial(
                 cls._decorate,
@@ -166,6 +167,8 @@ class CacheDict(BaseCache):
                 access=access,
                 outer_key=outer_key,
                 inner_key=inner_key)
+        else:
+            decorator_return = decorated
         return decorator_return
 
     @omnimethod
@@ -173,7 +176,7 @@ class CacheDict(BaseCache):
                  file_path: os.PathLike | str | None = None,
                  access: CacheAccess | None = None,
                  outer_key: Hashable | None = None,
-                 inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable:
+                 inner_key: str | Callable[[Any], Hashable] | None = None) -> DecoratedCallable | Decorator:
         """ Wraps a function and stores its execution results into a pickled cache dictionary.
 
         Examples:
@@ -240,6 +243,7 @@ class CacheDict(BaseCache):
 
     def __enter__(self) -> MyDefaultDict:
         if 'r' in self.access:
+            self.file_path = _resolve_filepath(self.file_path)
             self.cache_dict = initialize_cache_dict(self.file_path)
         else:
             self.cache_dict = MyDefaultDict(NoCache)
@@ -252,7 +256,7 @@ class CacheDict(BaseCache):
         self.cache_dict = None
 
     def get(self, key: None | Hashable) -> NoCache | MyDefaultDict | Any:
-        file_path = self.file_path
+        file_path = _resolve_filepath(self.file_path)
         cache_dict = _initialize_cache(file_path)
         if key is None:
             return cache_dict

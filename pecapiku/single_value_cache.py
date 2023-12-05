@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import os
 from functools import partial, wraps
-from typing import Any, Hashable
+from typing import Any, Generic, Hashable
 
-from pecapiku.base_cache import BaseCache, DecoratedCallable, omnimethod
+from pecapiku.base_cache import BaseCache, DecoratedCallable, Decorator, omnimethod
 from pecapiku.cache_access import CacheAccess, _initialize_cache, _resolve_filepath, update_cache
 from pecapiku.no_cache import NoCache
 
 
-class SingleValueCache(BaseCache):
+class SingleValueCache(BaseCache, Generic[DecoratedCallable]):
     """ Decorator for caching of evaluation results.
     Creates a "pickle" file at disk space on a specified path.
     Wraps a function and stores its execution result in the file.
@@ -48,22 +48,23 @@ class SingleValueCache(BaseCache):
         self.cache_dict = None
 
     def __call__(self,
-                 func: DecoratedCallable | None = None) -> DecoratedCallable:
-        return self.decorate(func)
+                 func: DecoratedCallable | None = None, *, file_path: os.PathLike | str | None = None,
+                 access: CacheAccess | None = None) -> DecoratedCallable | Decorator:
+        return self.decorate(func=func, file_path=file_path, access=access)
 
-    def get_cache_val(self, key: Hashable) -> Any:
+    def _get_cache_val(self, key: Hashable) -> Any:
         return _initialize_cache(self.file_path)
 
-    def put_cache_val(self, key: Hashable, value: Any):
+    def _put_cache_val(self, key: Hashable, value: Any):
         return update_cache(value, self.file_path)
 
-    def key_func(self, *args, **kwargs) -> Hashable:
+    def _key_func(self, *args, **kwargs) -> Hashable:
         return 0
 
     @classmethod
     def _decorate(cls, func: DecoratedCallable | None = None,
                   file_path: os.PathLike | str | None = None,
-                  access: CacheAccess = 'rew') -> DecoratedCallable:
+                  access: CacheAccess = 'rew') -> DecoratedCallable | Decorator:
         """ Wraps a function and stores its execution results into a pickle cache file.
 
         Example
@@ -100,9 +101,10 @@ class SingleValueCache(BaseCache):
             val = instance._read_execute_write(func, func_args=args, func_kwargs=kwargs, access=access)
             return val
 
-        decorator_return = decorated
         if func is None:
-            decorator_return = partial(cls.decorate, file_path=file_path, access=access)
+            decorator_return = partial(cls._decorate, file_path=file_path, access=access)
+        else:
+            decorator_return = decorated
         return decorator_return
 
     @staticmethod
@@ -111,8 +113,8 @@ class SingleValueCache(BaseCache):
         return _initialize_cache(file_path)
 
     @omnimethod
-    def decorate(self, func: DecoratedCallable | None = None, file_path: os.PathLike | str | None = None,
-                 access: CacheAccess | None = None, **kwargs) -> DecoratedCallable:
+    def decorate(self, func: DecoratedCallable | None = None, *, file_path: os.PathLike | str | None = None,
+                 access: CacheAccess | None = None, **kwargs) -> DecoratedCallable | Decorator:
         """ Wraps a function and stores its execution results into a pickle cache file.
 
         Example

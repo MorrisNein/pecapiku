@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 class NoCache:
     def __bool__(self):
         return False
