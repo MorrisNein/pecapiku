@@ -7,12 +7,13 @@ from functools import partial, update_wrapper
 from pathlib import Path
 from typing import Any, Callable, Generic, Hashable, Type, TypeVar
 
-from pecapiku.cache_access import COMP_CACHE_FILE_NAME, CacheAccess, _resolve_filepath
+from pecapiku.cache_access import CacheAccess
 from pecapiku.no_cache import NoCache
 
 logger = logging.getLogger(__file__)
 
 DecoratedCallable = TypeVar("DecoratedCallable", bound=Callable[..., Any])
+Decorator = Callable[[DecoratedCallable], DecoratedCallable]
 
 
 class omnimethod(Generic[DecoratedCallable]):
@@ -30,21 +31,20 @@ class omnimethod(Generic[DecoratedCallable]):
 
 class BaseCache(ABC):
     def __init__(self, file_path: os.PathLike | str | None = None, access: CacheAccess = 'rew'):
-        file_path = file_path or COMP_CACHE_FILE_NAME
-        file_path = _resolve_filepath(file_path)
-        self.file_path: Path = file_path
+        file_path = file_path or self._get_default_file_path()
+        self.file_path: Path | None = file_path if file_path is None else Path(file_path)
         self.access = access
 
     @abstractmethod
-    def get_cache_val(self, key: Hashable) -> Any:
+    def _get_cache_val(self, key: Hashable) -> Any:
         raise NotImplementedError()
 
     @abstractmethod
-    def put_cache_val(self, key: Hashable, value: Any):
+    def _put_cache_val(self, key: Hashable, value: Any):
         raise NotImplementedError()
 
     @abstractmethod
-    def key_func(self, *args, **kwargs) -> Hashable:
+    def _key_func(self, *args, **kwargs) -> Hashable:
         raise NotImplementedError()
 
     def _read_execute_write(self, func, func_args, func_kwargs, access, key_kwargs: dict | None = None) -> Any:
@@ -53,12 +53,12 @@ class BaseCache(ABC):
             logger.info('Executing cache value, since no access to the cache is provided...')
             return func(*func_args, **func_kwargs)
 
-        key = self.key_func(func, func_args, func_kwargs, **key_kwargs)
+        key = self._key_func(func, func_args, func_kwargs, **key_kwargs)
 
         was_read = False
         if 'r' in access:
             logger.info(f'Getting cache for the key "{key}"...')
-            val = self.get_cache_val(key)
+            val = self._get_cache_val(key)
         else:
             val = NoCache()
 
@@ -76,13 +76,13 @@ class BaseCache(ABC):
             val = func(*func_args, **func_kwargs)
 
         if 'w' in access and not was_read and not isinstance(val, NoCache):
-            self.put_cache_val(key, val)
+            self._put_cache_val(key, val)
             logger.info(f'Writing cache for the key "{key}": {val}...')
         return val
 
     @classmethod
     @abstractmethod
-    def _decorate(cls, func: DecoratedCallable, *args, **kwargs) -> DecoratedCallable:
+    def _decorate(cls, func: DecoratedCallable, *args, **kwargs) -> Decorator | DecoratedCallable:
         raise NotImplementedError()
 
     @classmethod
@@ -93,12 +93,13 @@ class BaseCache(ABC):
     @omnimethod
     def decorate(self: BaseCache | Type[BaseCache],
                  func: DecoratedCallable,
+                 *,
                  file_path: os.PathLike | str | None = None,
-                 access: CacheAccess | None = None, *args, **kwargs) -> DecoratedCallable:
+                 access: CacheAccess | None = None, **kwargs) -> Decorator | DecoratedCallable:
         if not isinstance(self, BaseCache):
             file_path = file_path or self._get_default_file_path()
             access = access or 'rew'
         else:
             file_path = file_path or self.file_path
             access = access or self.access
-        return self._decorate(func, file_path, access, *args, **kwargs)
+        return self._decorate(func, file_path, access, **kwargs)

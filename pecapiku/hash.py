@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Sequence
+from typing import Iterable, Sequence
 
 
 def get_hash(objects: Sequence[object]) -> str:
@@ -21,6 +21,9 @@ def _json_dumps(obj: object) -> str:
 
 
 def _json_default(obj: object):
+    if isinstance(obj, Iterable):
+        return list(obj)
+
     obj_class = obj.__class__
     class_path = '.'.join((obj_class.__module__, obj_class.__name__))
     vars_dict = vars(obj) if hasattr(obj, '__dict__') else {}
